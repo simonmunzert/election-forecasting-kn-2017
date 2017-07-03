@@ -13,29 +13,54 @@ source("functions.r")
 # how to register at Twitter as developer, obtain and use access tokens
 browseURL("https://mkearney.github.io/rtweet/articles/auth.html")
 
-# how to interact with the streamR package
-browseURL("http://pablobarbera.com/blog/archives/1.html")
+# name assigned to created app
+appname <- "TwitterToR"
+## api key (example below is not a real key)
+load("/Users/munzerts/rkeys.RDa")
+key <- TwitterToR_twitterkey
+## api secret (example below is not a real key)
+secret <- TwitterToR_twittersecret
+twitter_token <- create_token(
+  app = appname,
+  consumer_key = key,
+  consumer_secret = secret)
 
-# Stream keywords used to filter tweets
-q <- c("cdu","csu","spd","fdp","grüne","linke","afd","schulz","merkel","btw17")
+rt <- search_tweets("merkel", n = 200, token = twitter_token)
+View(rt)
 
-# load authentication credentials for Twitter. You have to have registered your app online and performed the OAuth authentication process to have this
-load("twitter_auth.RData")
+# set keywords used to filter tweets
+q <- paste0("schulz,merkel,btw17,btw2017")
 
-filterStream("german_parties.json", track = q, timeout = 60*1, oauth = twitCred)
-tweets <- parseTweets("german_parties.json", simplify = TRUE)
-names(tweets)
-cat(tweets$text[1])
+# set up directory and JSON dump
+rtweet.folder <- "data"
+streamname <- "btw17"
+filename <- file.path(rtweet.folder, paste0(streamname, "_", format(Sys.time(), "%F-%H-%M-%S"), ".json"))
 
-cdu <- str_detect(tweets$text, regex("cdu|csu|merkel", ignore_case = TRUE))
-spd <- str_detect(tweets$text, regex("spd|schulz", ignore_case = TRUE))
-fdp <- str_detect(tweets$text, regex("fdp", ignore_case = TRUE))
-gru <- str_detect(tweets$text, regex("grüne", ignore_case = TRUE))
-lin <- str_detect(tweets$text, regex("linke", ignore_case = TRUE))
-afd <- str_detect(tweets$text, regex("afd", ignore_case = TRUE))
-mentions_df <- data.frame(cdu, spd, fdp, gru, lin, afd)
-colMeans(mentions_df)
+# sink stream into JSON file
+stream_tweets(q = q, parse = FALSE,
+              timeout = 60,
+              file_name = filename,
+              language = "de",
+              token = twitter_token)
 
+# parse from json file
+rt <- parse_stream(filename)
+
+# inspect meta data
+names(rt)
+head(rt)
+
+# inspect users data
+users_data(rt) %>% head()
+users_data(rt) %>% names()
+
+# examine tweets
+rt <- parse_stream("data/btw17_2017-07-03-13-02-52.json") # keywords: merkel|schulz, language: de
+head(rt$text)
+schulz <- str_detect(rt$text, regex("schulz|spd", ignore_case = TRUE))
+merkel <- str_detect(rt$text, regex("merkel|cdu", ignore_case = TRUE))
+mentions_df <- data.frame(schulz,merkel)
+colMeans(mentions_df, na.rm = TRUE)
 
 
 

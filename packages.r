@@ -16,10 +16,13 @@ p_needed <- c("readr", # imports spreadsheet data
               "xtable", # generate table output
               "stargazer", # generate nice model table
               "rvest", # scraping suite
+              "lme4", # linear mixed effects models
               "RCurl",
               "XML",
               "zoo",
               "ROAuth",
+              "httpuv",
+              "rtweet",
               "streamR", 
               "pageviews", 
               "statsgrokse", 
