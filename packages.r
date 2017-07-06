@@ -17,16 +17,16 @@ p_needed <- c("readr", # imports spreadsheet data
               "stargazer", # generate nice model table
               "rvest", # scraping suite
               "lme4", # linear mixed effects models
-              "RCurl",
-              "XML",
-              "zoo",
-              "ROAuth",
-              "httpuv",
-              "rtweet",
-              "streamR", 
-              "pageviews", 
-              "statsgrokse", 
-              "odds.converter"
+              "RCurl", # HTTP communication suite
+              "XML", # XML parsing
+              "zoo", # dealing with time series data
+              "ROAuth", # performing OAuth authentication
+              "httpuv", # HTTP and WebSocket server
+              "rtweet", # R wrapper for Twitter's REST and Streaming APIs
+              "streamR", # R wrapper for Twitter's Streaming APIs
+              "pageviews", # R wrapper for Wikipedia's pageviews API
+              "statsgrokse", # R wrapper for pageviews data from statsgrok.se
+              "odds.converter" # functions to convert different flavors of odds
 )
 packages <- rownames(installed.packages())
 p_to_install <- p_needed[!(p_needed %in% packages)]

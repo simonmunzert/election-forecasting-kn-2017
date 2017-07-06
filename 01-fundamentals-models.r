@@ -72,7 +72,6 @@ plot(dat$chancellor_party,  dat$voteshare, xaxt = "n", yaxt = "n", xlab = "", yl
 axis(2, seq(0, 100, 10), seq(0, 100, 10))
 axis(1, seq(0, 1, 1), c("no chancellor party", "chancellor party"), tick = F)
 axis(2, 35, "vote share (%)", line = 1, tick = F)
-
 # run model, add regression line
 model_out <- lm(voteshare ~ chancellor_party, data = dat)
 model_out_aug <- augment(model_out)
@@ -97,11 +96,11 @@ summary(model_out)
 model_out_fit <- augment(model_out)
 model_out_fit$party <- ger_df_long$party[as.numeric(model_out_fit$.rownames)]
 model_out_fit$year <- ger_df_long$year[as.numeric(model_out_fit$.rownames)]
-mean(abs(model_out_fit$.resid))
-group_by(model_out_fit, party) %>% summarize(mae = mean(abs(.resid)))
+mean(abs(model_out_fit$.resid)) # mean absolute error
+group_by(model_out_fit, party) %>% summarize(mae = mean(abs(.resid))) # mean absolute error, by party
 
 plot(model_out_fit$.fitted, model_out_fit$voteshare, cex = .5, pch = 20)
-text(model_out_fit$.fitted, model_out_fit$voteshare, paste0(model_out_fit$party, str_sub(as.character(model_out_fit$year), -2, -1)), pos = 3, offset = .15, cex = .6)
+text(model_out_fit$.fitted, model_out_fit$voteshare, paste0(model_out_fit$party, str_sub(as.character(model_out_fit$year), -2, -1)), pos = 3, offset = .15, cex = .9)
 grid()
 abline(0, 1)
 
@@ -120,9 +119,9 @@ augment(model_out, newdata = dat_2017)
 se_pred <- sqrt(predict_pred$se.fit^2+sum((model_out$residuals^2 / model_out$df.residual))) # see http://stats.stackexchange.com/questions/154247/what-are-the-formulae-used-in-r-by-predict-lm-when-interval-a-none-b-pred
 
 conf_fit <- data.frame(fit = predict_pred$fit[,1],
-                        lwr = predict_pred$fit[,1] + qt(0.025, predict_pred$df) * predict_pred$se.fit,
-                        upr = predict_pred$fit[,1] - qt(0.025, predict_pred$df) * predict_pred$se.fit
-                        )
+                       lwr = predict_pred$fit[,1] + qt(0.025, predict_pred$df) * predict_pred$se.fit,
+                       upr = predict_pred$fit[,1] - qt(0.025, predict_pred$df) * predict_pred$se.fit
+)
 conf_fit
 
 pred_fit <- data.frame(fit = predict_pred$fit[,1],
@@ -145,7 +144,6 @@ axis(1, mean(c(0, 45)), "Forecasted vote share (%)", line = 1, tick = F)
 axis(2, preds_df$partyrank, labels = preds_df$partyname, las = 1, tick = F)
 axis(4, preds_df$partyrank, labels = paste0(format(preds_df$fit, digits = 2, trim = TRUE),  "%")
      , line = 1.5, tick = F,las = 2, hadj = 1)
-
 abline(v = seq(0, 45, 5), col = "darkgrey", lty = 2)
 for (i in preds_df$partyrank){
   lines(x=c(preds_df$lwr[i],preds_df$upr[i]), y=c(i,i), lwd = 1)
@@ -163,7 +161,21 @@ d <- select(ger_df_long, voteshare, chancellor_party, voteshare_l1, voteshare_l1
 dep_var <- 'voteshare'
 indep_vars <- setdiff(names(d), dep_var)
 
-# run all possible models
+# consideration 1: how to generate set of all possible models?
+combn(length(indep_vars), 1) # all models with one predictor
+combn(length(indep_vars), 2) # all models with two predictors
+combn(length(indep_vars), 3) # all models with three predictors
+# ... and so on
+
+# consideration 2: how to build formulas from these models?
+which.vars <- combn(length(indep_vars), 3)[,1]
+paste(c(dep_var, paste(indep_vars[which.vars], collapse = "+")), collapse = '~')
+
+# consideration 3: how to run all models?
+which.formula <- paste(c(dep_var, paste(indep_vars[which.vars], collapse = "+")), collapse = '~')
+lm(as.formula(which.formula), data = d)
+
+# run all models
 lms <- Reduce(append, lapply(seq_along(indep_vars),
                              function(num_vars) {
                                Reduce(append, apply(combn(length(indep_vars), num_vars), 2, function(vars) {
@@ -187,12 +199,7 @@ sum_tab$ratio <- sum_tab$r_squared / sum_tab$num_vars
 i = 2017
 lms_best <- lms[sum_tab$r_squared > .35]
 lms_best_predictions <- sapply(lms_best, predict.lm, newdata = filter(ger_df_long, year == i)) %>% t() %>% as.data.frame() 
-lms_best_predictions <- apply(lms_best_predictions, 1, add, filter(ger_df_long, year == i)$voteshare_l1) %>% t() %>% as.data.frame
-names(lms_best_predictions) <- filter(ger_df_long, year == i)$party
-summary(lms_best_predictions)
-lms_best_predictions$vote_sums <- rowSums(lms_best_predictions)
-
-# summarize predictions
+#lms_best_predictions <- apply(lms_best_predictions, 1, add, filter(ger_df_long, year == i)$voteshare_l1) %>% t() %>% as.data.frame
 names(lms_best_predictions) <- filter(ger_df_long, year == i)$party
 summary(lms_best_predictions)
 
@@ -234,8 +241,10 @@ abline(0, 1)
 
 model_out <- lm(voteshare ~ chancellor_party + voteshare_l1 + polls_200_230, data = ger_df_long)
 voteshare_pred <- predict(model_out, filter(ger_df_long, year == 2017), se.fit = TRUE, interval = "prediction")
+se_pred <- sqrt(voteshare_pred$se.fit^2+sum((model_out$residuals^2 / model_out$df.residual)))
 
-voteshare_pred_sim <- replicate(1000, rnorm(rep(1, length(voteshare_pred$fit[,"fit"])), mean = voteshare_pred$fit[,"fit"], sd = sqrt(voteshare_pred$se.fit^2+var(model_out$residuals)))) %>% t() %>% as.data.frame
+
+voteshare_pred_sim <- replicate(1000, rnorm(rep(1, length(voteshare_pred$fit[,"fit"])), mean = voteshare_pred$fit[,"fit"], sd = se_pred)) %>% t() %>% as.data.frame
 
 names(voteshare_pred_sim) <- filter(ger_df_long, year == 2017)$party %>% as.character
 plot(density(voteshare_pred_sim$cdu), xlim = c(20, 50))

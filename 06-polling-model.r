@@ -8,12 +8,6 @@
 source("packages.r")
 source("functions.r")
 
-library(foreign)
-library(lme4)
-library(boot)
-library(Hmisc)
-
-
 # load data
 load("data/polls_btw.RData")
 load("data/ger_model_df.RData")
@@ -29,8 +23,6 @@ wahlrecht_df <- filter(wahlrecht_df, party != "afd", date > "1998-01-01")
 results <- select(ger_df_long, year, party, voteshare)
 names(results) <- c("election", "party", "voteshare")
 wahlrecht_df <- merge(wahlrecht_df, results, all.x = TRUE, by = c("election", "party"))
-
-
 
 # plot support trend, by party, loess curve
 parties <- c("cdu", "spd", "fdp", "gru", "lin")
@@ -49,7 +41,7 @@ for (i in seq_along(parties)) {
   axis(1, seq(dat_range[1], dat_range[2], by = "1 year"), seq(year(dat_range[1]), year(dat_range[2]), 1))
   axis(2, seq(0, 60, 2), seq(0, 60, 2))
 }
-
+dev.off()
 
 
 ### select lead time ---------------------------

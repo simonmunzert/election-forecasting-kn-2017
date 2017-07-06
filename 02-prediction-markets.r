@@ -46,11 +46,13 @@ grid()
 
 
 
-# Condorcet's jury theorem
-plot(NA, NA, ylim = c(0, 1), xlim = c(0, 1), xlab = "individual probability", ylab = "group probability")
-abline(0, 1, lty = 2)
-N <- 50 # number of jurors
-m <- N/2 + 1 # number of jurors required for majority
-curve(pbinom(m, size = N, prob = x, lower.tail = FALSE), add = TRUE)
-grid()
+#######################
+### IT'S YOUR SHOT! ###
+#######################
+
+# oddschecker.com provides another market on who will become the next chancellor. Look up odds for Merkel vs. Schulz and compute the market-implied probabilities! Are they equivalent to the probabilities of who will become the largest party in parliament? Why? Why not?
+
+
+
+
 

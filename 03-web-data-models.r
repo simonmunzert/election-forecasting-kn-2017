@@ -80,25 +80,13 @@ clinton_views <- article_pageviews(project = "en.wikipedia", article = "Hillary 
 plot(ymd(trump_views$date), trump_views$views, col = "red", type = "l")
 lines(ymd(clinton_views$date), clinton_views$views, col = "blue")
 
-# German parties
-german_parties_views <- article_pageviews(
-  project = "de.wikipedia", 
-  article = c("Christlich Demokratische Union Deutschlands", "Christlich-Soziale Union in Bayern", "Sozialdemokratische Partei Deutschlands", "Freie Demokratische Partei", "Bündnis 90/Die Grünen", "Die Linke", "Alternative für Deutschland"),
-  user_type = "user", 
-  start = "2017010100", 
-  end = "2017060100"
-)
-table(german_parties_views$article)
 
-parties <- unique(german_parties_views$article)
-dat <- filter(german_parties_views, article == parties[1])
-plot(ymd(dat$date), dat$views, col = "black", type = "l")
-dat <- filter(german_parties_views, article == parties[2])
-lines(ymd(dat$date), dat$views, col = "blue")
-dat <- filter(german_parties_views, article == parties[3])
-lines(ymd(dat$date), dat$views, col = "red")
-dat <- filter(german_parties_views, article == parties[7])
-lines(ymd(dat$date), dat$views, col = "brown")
+
+#######################
+### IT'S YOUR SHOT! ###
+#######################
+
+# Now consider articles about the major German parties in the German Wikipedia. Try to grab their pageviews and visualize them!
 
 
 
