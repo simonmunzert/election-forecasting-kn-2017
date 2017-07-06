@@ -6,7 +6,12 @@
 - `01-fundamentals-models.r`: how to build a fundamentals-based election forecasting model, with the German Federal election as a showcase
 - `02-prediction-markets.r`: how to access and process odds from betting platforms
 - `03-web-data-models.r`: how to access data from platforms such as Twitter, Wikipedia, and Google Trends
-- `04-scraping-wahlrecht-de.r`: script to crawl polling data from [wahlrecht.de](http://wahlrecht.de)
+- `04-scraping-wahlrecht.r`: script to crawl polling data from [wahlrecht.de](http://wahlrecht.de)
+- `05-prepare-wahlrecht.r`: script to clean up wahlrecht data
+- `06-polling-model.r`: replication code for Selb and Munzert 2016
+- `07-r-data-descriptives.r`: code to prepare structural model dataset
+
+
 
 
 **Data**
